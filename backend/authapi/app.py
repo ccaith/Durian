@@ -7,10 +7,14 @@ import os
 import datetime
 import tempfile
 
+from routes.forum_routes import forum_bp
+
 app = Flask(__name__)
 
 # Allow ALL origins for ngrok testing
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+app.register_blueprint(forum_bp, url_prefix='/forum')
 
 #test
 # Add to app.py

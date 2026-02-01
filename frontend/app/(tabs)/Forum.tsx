@@ -82,12 +82,24 @@ export default function Forum() {
   const fetchPosts = async () => {
     try {
       setLoadingPosts(true);
-      const response = await fetch(
-        `${API_URL}/forum/posts?category=${selectedCategory}&search=${searchQuery}`
-      );
+      const url = `${API_URL}/forum/posts?category=${selectedCategory}&search=${searchQuery}`;
+      console.log('[CLIENT] fetchPosts url:', url);
+
+      const response = await fetch(url);
+      console.log('[CLIENT] fetchPosts status:', response.status, response.headers.get('content-type'));
+
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('[CLIENT] fetchPosts non-JSON response:', response.status, text);
+        Alert.alert('Error', `Server error: ${response.status}`);
+        return;
+      }
+
       const data = await response.json();
       
       if (data.success) {
+        console.log('[CLIENT] fetchPosts data.posts length:', data.posts?.length, 'firstId:', data.posts?.[0]?._id);
         setPosts(data.posts);
       } else {
         Alert.alert("Error", "Failed to load posts");
@@ -328,6 +340,11 @@ export default function Forum() {
       }
     })();
   }, []);
+
+  // Debug: log posts state changes
+  useEffect(() => {
+    console.log('[CLIENT] posts state changed:', posts.length);
+  }, [posts]);
 
   const getCategoryColor = (category: string) => {
     switch(category) {
