@@ -129,13 +129,15 @@ const Footer: React.FC<FooterProps> = ({
   );
 };
 
+import { useResponsive } from '../utils/platform';
+const { isWeb } = useResponsive();
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#065F46', // Dark green
     paddingTop: 40,
     paddingBottom: 24,
     paddingHorizontal: 24,
-    ...(Platform.OS === 'web' && {
+    ...(isWeb && {
       marginTop: 'auto',
     }),
   },
@@ -151,7 +153,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   topSection: {
-    flexDirection: Platform.OS === 'web' ? 'row' : 'column',
+    flexDirection: isWeb ? 'row' : 'column',
     justifyContent: 'space-between',
     flexWrap: 'wrap',
     gap: 32,
@@ -159,7 +161,7 @@ const styles = StyleSheet.create({
   brandSection: {
     flex: 1,
     minWidth: 200,
-    maxWidth: Platform.OS === 'web' ? 300 : '100%',
+    maxWidth: isWeb ? 300 : '100%',
   },
   logoContainer: {
     flexDirection: 'row',

@@ -1,6 +1,4 @@
-import { StyleSheet, Platform, Dimensions } from 'react-native';
-
-const { width, height } = Dimensions.get('window');
+import { StyleSheet } from 'react-native';
 
 // Facebook-inspired Color Palette
 const colors = {
@@ -39,11 +37,8 @@ const colors = {
   shadowColor: '#000000',
 };
 
-// Responsive breakpoints
-const isSmallScreen = width < 375;
-const isMediumScreen = width >= 375 && width < 768;
-const isLargeScreen = width >= 768;
-const isWeb = Platform.OS === 'web';
+import { useResponsive } from '../utils/platform';
+const { isWeb, isSmallScreen, isMediumScreen, isLargeScreen, width } = useResponsive();
 
 // Responsive sizing helpers
 const scale = (size: number) => {

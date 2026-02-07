@@ -1,10 +1,6 @@
-import { StyleSheet, Platform, Dimensions } from 'react-native';
-
-
-
-const { width } = Dimensions.get('window');
-
-const isSmallScreen = width < 375;
+import { StyleSheet, Platform } from 'react-native';
+import { useResponsive } from '../utils/platform';
+const { isWeb, isSmallScreen, isMediumScreen, isLargeScreen, width } = useResponsive();
 
 
 

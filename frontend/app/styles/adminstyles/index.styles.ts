@@ -1,4 +1,6 @@
 import { StyleSheet, Platform } from 'react-native';
+import { useResponsive } from '../../utils/platform';
+const { isWeb, isSmallScreen, isMediumScreen, isLargeScreen } = useResponsive();
 
 const styles = StyleSheet.create({
   container: {
@@ -20,7 +22,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 30,
-    marginTop: Platform.OS === 'web' ? 20 : 40,
+    marginTop: isWeb ? 20 : 40,
     ...Platform.select({
       web: {
         maxWidth: 1200,
@@ -31,7 +33,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: Platform.OS === 'web' ? 32 : 26,
+    fontSize: isWeb ? 32 : 26,
     fontWeight: 'bold',
     color: '#1b5e20',
     ...Platform.select({

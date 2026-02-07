@@ -1,12 +1,8 @@
-import { StyleSheet, Platform, Dimensions } from 'react-native';
 
-const { width, height } = Dimensions.get('window');
+import { StyleSheet, Dimensions, Platform } from 'react-native';
+import { useResponsive } from '../utils/platform';
 
-// Responsive helper functions
-const isWeb = Platform.OS === 'web';
-const isSmallScreen = width < 375;
-const isMediumScreen = width >= 375 && width < 768;
-const isLargeScreen = width >= 768;
+const { isWeb, isSmallScreen, isMediumScreen, isLargeScreen, width } = useResponsive();
 
 // Vibrant Color Palette
 const colors = {
@@ -716,6 +712,34 @@ export const useLandingStyles = () => {
       textShadowColor: 'rgba(0, 0, 0, 0.2)',
       textShadowOffset: { width: 1, height: 1 },
       textShadowRadius: 2,
+    },
+
+    // Featured Articles styles
+    articlesContainer: {
+      marginTop: isSmall ? 16 : 32,
+      paddingHorizontal: isSmall ? 12 : 24,
+      gap: isSmall ? 16 : 24,
+    },
+    articleCard: {
+      backgroundColor: colors.bgWhite,
+      borderRadius: 12,
+      padding: isSmall ? 16 : 24,
+      marginBottom: isSmall ? 12 : 16,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 6,
+      elevation: 2,
+    },
+    articleTitle: {
+      fontSize: isSmall ? 16 : 18,
+      fontWeight: '700',
+      color: colors.primaryDark,
+      marginBottom: 4,
+    },
+    articleDesc: {
+      fontSize: isSmall ? 13 : 15,
+      color: colors.textMedium,
     },
   });
 };

@@ -20,6 +20,7 @@ import axios from "axios";
 import { router } from "expo-router";
 import { API_URL } from "./config/appconf"; 
 import { useLandingStyles } from "./styles/LandingScreen.styles";
+import { useResponsive } from './utils/platform';
 import * as ImagePicker from 'expo-image-picker';
 import Footer from './components/Footer';
 
@@ -37,9 +38,7 @@ export default function Landing() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [authDropdownVisible, setAuthDropdownVisible] = useState(false);
 
-  const { width, height } = useWindowDimensions();
-  const isWeb = Platform.OS === "web";
-  const isSmallScreen = width < 375;
+  const { isWeb, isSmallScreen, isMediumScreen, isLargeScreen, width } = useResponsive();
 
   const styles = useLandingStyles();
   const scrollRef = useRef<ScrollView | null>(null);
@@ -472,80 +471,23 @@ export default function Landing() {
         </View>
 
 
-        {/* About Us */}
-        <View style={styles.infoSection} onLayout={(e) => { const y = e.nativeEvent?.layout?.y ?? 0; setAnchors(prev => ({ ...prev, about: y })); }}>
-          <Text style={styles.sectionTitle}>About Us</Text>
-          <Text style={styles.aboutSubtitle}>Meet the team behind Durianostics</Text>
+        {/* Featured Articles */}
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionTitle}>Featured Articles</Text>
+          <Text style={styles.aboutSubtitle}>Read the latest insights and news about durian farming, export, and AI technology.</Text>
 
-          <View style={styles.teamContainer}>
-            <View style={styles.teamMember}>
-              <View style={styles.teamImageWrapper}>
-                <Image
-                  source={require("../assets/images/aia.jpg")}
-                  style={styles.teamImage}
-                />
-              </View>
-              <Text style={styles.teamName}>Garcia, Aia A.</Text>
-              <Text style={styles.teamRole}>Group Leader</Text>
-              <Text style={styles.teamDesc}>
-                Leading expert in agricultural AI with 15+ years developing machine learning solutions for crop analysis.
-              </Text>
+          <View style={styles.articlesContainer}>
+            <View style={styles.articleCard}>
+              <Text style={styles.articleTitle}>AI in Durian Quality Control</Text>
+              <Text style={styles.articleDesc}>Discover how artificial intelligence is revolutionizing durian quality assessment for farmers and exporters.</Text>
             </View>
-
-            <View style={styles.teamMember}>
-              <View style={styles.teamImageWrapper}>
-                <Image
-                  source={require("../assets/images/evan.jpg")}
-                  style={styles.teamImage}
-                />
-              </View>
-              <Text style={styles.teamName}>Piad, Carl Evan T.</Text>
-              <Text style={styles.teamRole}>Member 1</Text>
-              <Text style={styles.teamDesc}>
-                Third-generation durian farmer with deep knowledge of quality standards and export regulations.
-              </Text>
+            <View style={styles.articleCard}>
+              <Text style={styles.articleTitle}>Exporting Durian: Best Practices</Text>
+              <Text style={styles.articleDesc}>Learn the key steps and regulations for successfully exporting durian to international markets.</Text>
             </View>
-
-            <View style={styles.teamMember}>
-              <View style={styles.teamImageWrapper}>
-                <Image
-                  source={require("../assets/images/kat.jpg")}
-                  style={styles.teamImage}
-                />
-              </View>
-              <Text style={styles.teamName}>Priol, Kathleen Mae R.</Text>
-              <Text style={styles.teamRole}>Member 2</Text>
-              <Text style={styles.teamDesc}>
-                Former agricultural tech consultant helping farmers adopt cutting-edge solutions for better yields.
-              </Text>
-            </View>
-
-            <View style={styles.teamMember}>
-              <View style={styles.teamImageWrapper}>
-                <Image
-                  source={require("../assets/images/kevin.png")}
-                  style={styles.teamImage}
-                />
-              </View>
-              <Text style={styles.teamName}>Ofracio, Kevin R.</Text>
-              <Text style={styles.teamRole}>Member 3</Text>
-              <Text style={styles.teamDesc}>
-                Full-stack developer specializing in mobile apps and real-time image processing systems.
-              </Text>
-            </View>
-
-            <View style={styles.teamMember}>
-              <View style={styles.teamImageWrapper}>
-                <Image
-                  source={require("../assets/images/feature2.jpg")}
-                  style={styles.teamImage}
-                />
-              </View>
-              <Text style={styles.teamName}>Mrs. Pops V. Madriaga</Text>
-              <Text style={styles.teamRole}>Adviser</Text>
-              <Text style={styles.teamDesc}>
-                Connecting durian exporters with international markets through technology-driven quality assurance.
-              </Text>
+            <View style={styles.articleCard}>
+              <Text style={styles.articleTitle}>Early Disease Detection</Text>
+              <Text style={styles.articleDesc}>How early detection and AI can help prevent crop loss and improve yields for durian farmers.</Text>
             </View>
           </View>
         </View>

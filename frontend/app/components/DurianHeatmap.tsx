@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 import styles from '../styles/Home.styles';
+import { useResponsive } from '../utils/platform';
 
 // Durian production data for Philippines
 const DURIAN_DATA = [
@@ -30,18 +31,14 @@ interface HeatmapProps {
   onPlotlyLoad: () => void;
 }
 
-export default function DurianHeatmap({ 
-  mapMode, 
-  onMapModeChange, 
-  onRegionSelect,
-  plotlyLoaded,
-  onPlotlyLoad 
-}: HeatmapProps) {
+export default function DurianHeatmap(props: HeatmapProps) {
+  const { mapMode, onMapModeChange, onRegionSelect, plotlyLoaded, onPlotlyLoad } = props;
   const plotRef = useRef<HTMLDivElement>(null);
+  const { isWeb } = useResponsive();
 
   // Load Plotly.js for web
   useEffect(() => {
-    if (Platform.OS === 'web' && !plotlyLoaded) {
+    if (isWeb && !plotlyLoaded) {
       const script = document.createElement('script');
       script.src = 'https://cdn.plot.ly/plotly-2.24.1.min.js';
       script.onload = () => {
@@ -57,13 +54,13 @@ export default function DurianHeatmap({
         }
       };
     }
-  }, []);
+  }, [isWeb, plotlyLoaded]);
 
   useEffect(() => {
-    if (Platform.OS === 'web' && plotlyLoaded) {
+    if (isWeb && plotlyLoaded) {
       renderMap();
     }
-  }, [plotlyLoaded, mapMode]);
+  }, [isWeb, plotlyLoaded, mapMode]);
 
   const renderMap = () => {
     if (!plotRef.current || !(window as any).Plotly) return;
@@ -229,7 +226,7 @@ export default function DurianHeatmap({
 
       {/* Map Container */}
       <View style={styles.mapViewport}>
-        {Platform.OS === 'web' ? (
+        {isWeb ? (
           plotlyLoaded ? (
             <div 
               ref={plotRef} 

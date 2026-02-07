@@ -7,19 +7,17 @@ import {
   TouchableOpacity, 
   TextInput,
   Image, 
-  StyleSheet, 
-  Platform,
-  Dimensions,
+  StyleSheet,
   Modal,
   Alert,
   ActivityIndicator,
   RefreshControl
 } from "react-native";
+import { useResponsive } from '../utils/platform';
 import styles from "../styles/Forum.styles";
 import { API_URL } from "../config/appconf";
 
-const { width } = Dimensions.get("window");
-const isWeb = Platform.OS === "web";
+const { isWeb, isSmallScreen, isMediumScreen, isLargeScreen, width } = useResponsive();
 const isMobile = width < 768;
 
 interface ForumPost {
