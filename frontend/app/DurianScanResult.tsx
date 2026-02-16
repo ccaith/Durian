@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   View,
@@ -19,6 +20,7 @@ export default function DurianScanResult() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
+
   // Parse the result from params
   const imageUri = params.imageUri as string;
   const resultStr = params.result as string;
@@ -30,6 +32,7 @@ export default function DurianScanResult() {
     console.error('Failed to parse result:', e);
   }
 
+  const color = result?.color;
   const detection = result?.detection || {};
   const analysis = result?.analysis || {};
   const objects = detection.objects || [];
@@ -147,6 +150,23 @@ export default function DurianScanResult() {
                   </Text>
                 </View>
               ))}
+            </View>
+          )}
+
+          {/* Color Classification Result */}
+          {color && color.success && (
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Color Classification</Text>
+              <View style={styles.detailRow}>
+                <Ionicons name="color-palette-outline" size={20} color="#666" />
+                <Text style={styles.detailLabel}>Color:</Text>
+                <Text style={styles.detailValue}>{color.color_class || 'N/A'}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Ionicons name="trending-up-outline" size={20} color="#666" />
+                <Text style={styles.detailLabel}>Confidence:</Text>
+                <Text style={styles.detailValue}>{color.confidence ? `${(color.confidence * 100).toFixed(1)}%` : 'N/A'}</Text>
+              </View>
             </View>
           )}
 

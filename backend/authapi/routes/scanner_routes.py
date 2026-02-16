@@ -7,6 +7,7 @@ import uuid
 
 # Use local YOLO model (your trained model)
 from ai.yolo_detector import get_yolo_detector
+from ai.durian_color import get_durian_color
 from handlers.cloudinary_handler import CloudinaryScan
 from db import (
     save_scan, get_user_scans, get_scan_by_id, delete_scan,
@@ -99,6 +100,12 @@ def detect_durians():
         # Use local YOLO model for detection
         detector = get_yolo_detector()
         result = detector.predict(temp_path)
+
+        # Durian color classification
+        print("[DEBUG] Calling get_durian_color with:", temp_path)
+        color_result = get_durian_color(temp_path)
+        print("[DEBUG] Color result:", color_result)
+        result["color"] = color_result
         
         # If detection successful and user wants to save, upload to Cloudinary
         cloudinary_data = None
