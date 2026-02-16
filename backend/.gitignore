@@ -33,11 +33,7 @@ datasets/
 *.tflite
 
 # Trained Models (large files)
-models/*.pt
-models/*.onnx
-models/*.pth
-models/trained_*
-!models/.gitkeep
+
 
 # Training outputs
 training_scripts/runs/
