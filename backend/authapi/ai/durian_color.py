@@ -36,21 +36,6 @@ def load_color_model(model_path: Optional[str] = None):
 	model.eval()
 	_color_model = model
 	return _color_model
-def load_color_model(model_path: Optional[str] = None):
-	global _color_model
-	if _color_model is not None:
-		return _color_model
-	if model_path is None:
-		model_path = DEFAULT_MODEL
-	if not os.path.exists(model_path):
-		raise FileNotFoundError(f"Color model not found: {model_path}")
-	# Use timm to create the model, matching training
-	model = timm.create_model("efficientnet_b0", pretrained=False)
-	model.classifier = torch.nn.Linear(model.classifier.in_features, len(COLOR_CLASSES))
-	model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-	model.eval()
-	_color_model = model
-	return _color_model
 
 def preprocess_image(img_path: str, target_size=(224, 224)):
 	img = Image.open(img_path).convert('RGB')
@@ -85,7 +70,7 @@ def get_durian_color(image_path: str, model_path: Optional[str] = None) -> Dict[
 			"color_class": color_class,
 			"confidence": round(confidence, 4),
 			"class_index": class_idx,
-			"raw": probs.tolist()
+			"raw": [float(x) for x in probs.tolist()]  # Ensure all values are native Python floats
 		}
 	except Exception as e:
 		return {
@@ -93,6 +78,3 @@ def get_durian_color(image_path: str, model_path: Optional[str] = None) -> Dict[
 			"error": str(type(e).__name__),
 			"message": str(e)
 		}
-
-	# Example usage:
-	# result = get_durian_color("/path/to/image.jpg")
