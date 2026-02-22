@@ -1,11 +1,17 @@
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))  # adds backend/ to path
+
 from flask import Flask, request, jsonify
 
 from flask_cors import CORS
 
 import datetime
 
-
-
+from flask_mail import Mail
+import os
+from dotenv import load_dotenv
 from routes.forum_routes import forum_bp
 
 from routes.profile_routes import profile_bp
@@ -17,11 +23,11 @@ from routes.admin.admin_routes import admin_bp
 from routes.scanner_routes import scanner_bp
 from routes.chatbot_routes import chatbot_bp
 from routes.shop_routes import shop_bp
+from routes.transaction_routes import bp as transaction_bp
 
-
+load_dotenv()
 
 app = Flask(__name__)
-
 
 
 # Allow ALL origins for ngrok testing
@@ -37,8 +43,23 @@ app.register_blueprint(admin_bp, url_prefix='/admin')
 app.register_blueprint(scanner_bp, url_prefix='/scanner')
 app.register_blueprint(chatbot_bp, url_prefix='/chatbot')
 app.register_blueprint(shop_bp, url_prefix='/')
+app.register_blueprint(transaction_bp)
 
 
+# Mail setup
+app.config['MAIL_SERVER'] = os.getenv("MAIL_HOST")
+app.config['MAIL_PORT'] = int(os.getenv("MAIL_PORT", 25))
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
+app.config['MAIL_DEFAULT_SENDER'] = (
+    os.getenv("MAIL_FROM_NAME", "DurianSupport"),
+    os.getenv("MAIL_FROM_ADDRESS", "duriansupport@durianapp.com")
+)
+
+# Initialize Mail
+mail = Mail()
+mail.init_app(app)
 
 # ---------------------------
 

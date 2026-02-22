@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { useUser } from '@/contexts/UserContext';
 
 export interface CartItem {
   id: string;
@@ -19,32 +20,74 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cart, setCart] = useState<CartItem[]>([]);
+const [userCarts, setUserCarts] = useState<Record<string, CartItem[]>>({});
+const { user } = useUser();
+const cart = user ? userCarts[user.id] || [] : [];
 
   const addToCart = (item: CartItem) => {
-    setCart(prev => {
-      const existing = prev.find(p => p.id === item.id);
-      if (existing) {
-        return prev.map(p => 
-          p.id === item.id ? { ...p, quantity: p.quantity + 1 } : p
-        );
-      }
-      return [...prev, { ...item, quantity: 1 }];
-    });
-  };
+  if (!user) return;
+
+  setUserCarts(prev => {
+    const currentCart = prev[user.id] || [];
+
+    const existing = currentCart.find(p => p.id === item.id);
+
+    let updatedCart;
+
+    if (existing) {
+      updatedCart = currentCart.map(p =>
+        p.id === item.id ? { ...p, quantity: p.quantity + 1 } : p
+      );
+    } else {
+      updatedCart = [...currentCart, { ...item, quantity: 1 }];
+    }
+
+    return {
+      ...prev,
+      [user.id]: updatedCart
+    };
+  });
+};
 
   const removeFromCart = (id: string) => {
-    setCart(prev => prev.filter(p => p.id !== id));
-  };
+  if (!user) return;
 
-  const clearCart = () => setCart([]);
+  setUserCarts(prev => {
+    const currentCart = prev[user.id] || [];
+    const updatedCart = currentCart.filter(p => p.id !== id);
+
+    return {
+      ...prev,
+      [user.id]: updatedCart
+    };
+  });
+};
+
+  const clearCart = () => {
+  if (!user) return;
+
+  setUserCarts(prev => ({
+    ...prev,
+    [user.id]: []
+  }));
+};
 
   const updateQuantity = (id: string, quantity: number) => {
-    if (quantity < 1) return; // prevent zero or negative
-    setCart(prev =>
-      prev.map(p => (p.id === id ? { ...p, quantity } : p))
+  if (!user || quantity < 1) return;
+
+  setUserCarts(prev => {
+    const currentCart = prev[user.id] || [];
+
+    const updatedCart = currentCart.map(p =>
+      p.id === id ? { ...p, quantity } : p
     );
-  };
+
+    return {
+      ...prev,
+      [user.id]: updatedCart
+    };
+  });
+};
 
   return (
     <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, updateQuantity }}>

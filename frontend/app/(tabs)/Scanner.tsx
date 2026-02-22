@@ -127,6 +127,7 @@ export default function Scanner() {
   };
 
   // Analyze image with backend API
+   // Analyze image with backend API
   const analyzeImage = async (imageUri: string) => {
     setIsAnalyzing(true);
     setAnalysisResult(null);
@@ -162,7 +163,7 @@ export default function Scanner() {
 
       // Send to backend with user ID header
       const headers: Record<string, string> = {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'ngrok-skip-browser-warning': 'true',
       };
 
@@ -181,16 +182,68 @@ export default function Scanner() {
       if (result.success) {
         setAnalysisResult(result);
 
-        // Use Cloudinary URL if scan was saved, otherwise use local URI
+        let diseaseResult = null;
+
+        try {
+          const diseaseForm = new FormData();
+
+          if (Platform.OS === 'web') {
+            const response = await fetch(imageUri);
+            const blob = await response.blob();
+            diseaseForm.append('image', blob, 'durian_scan.jpg');
+          } else {
+            const filename = imageUri.split('/').pop() || 'durian_scan.jpg';
+            const match = /\.(\w+)$/.exec(filename);
+            const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+            diseaseForm.append('image', {
+              uri: imageUri,
+              name: filename,
+              type,
+            } as any);
+          }
+
+          const diseaseHeaders: Record<string, string> = {
+            Accept: 'application/json',
+            'ngrok-skip-browser-warning': 'true',
+          };
+
+          if (user?.id) {
+            diseaseForm.append('user_id', user.id);
+            diseaseHeaders['X-User-Id'] = user.id;
+          }
+
+          const diseaseResponse = await fetch(
+            `${API_URL}/scanner/classify/disease`,
+            {
+              method: 'POST',
+              headers: diseaseHeaders,
+              body: diseaseForm,
+            }
+          );
+
+          diseaseResult = await diseaseResponse.json();
+        } catch (err) {
+          console.error('Disease classify error:', err);
+        }
+
+        // Merge detection + disease
+        const merged = {
+          ...result,
+          disease: diseaseResult?.disease || 'healthy',
+          detections: diseaseResult?.detections || [],
+        };
+
+        // Use Cloudinary URL if scan was saved, otherwise local
         const displayImageUri = result.cloudinary?.image_url || imageUri;
 
-        // Navigate to results screen with data
+        // Navigate to results screen with merged data
         router.push({
           pathname: '/DurianScanResult',
           params: {
             imageUri: displayImageUri,
-            localImageUri: imageUri, // Keep local URI as fallback
-            result: JSON.stringify(result),
+            localImageUri: imageUri,
+            result: JSON.stringify(merged),
             scanSaved: result.scan_saved ? 'true' : 'false',
             scanId: result.scan_id || '',
           },
@@ -208,7 +261,6 @@ export default function Scanner() {
       setIsAnalyzing(false);
     }
   };
-
   // Reset scanner
   const resetScanner = () => {
     setCapturedImage(null);
