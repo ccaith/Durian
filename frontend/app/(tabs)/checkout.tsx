@@ -11,11 +11,17 @@ import {
 } from 'react-native';
 import { useCart } from '@/contexts/CartContext';
 import { Fonts, Palette } from '@/constants/theme';
+import axios from 'axios';
+import { useUser } from '@/contexts/UserContext';
+
 
 export default function Checkout() {
   const { cart, removeFromCart, clearCart, updateQuantity } = useCart();
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
+  const { user } = useUser();
+  const [loading, setLoading] = React.useState(false);
+  const [showReceipt, setShowReceipt] = React.useState(false);
+  const [receiptData, setReceiptData] = React.useState<any>(null);
   const renderItem = ({ item }: any) => (
     <View style={styles.card}>
       <Image source={item.image} style={styles.image} />
@@ -71,16 +77,90 @@ export default function Checkout() {
           <Text style={styles.total}>Total: ₱{total}</Text>
 
           <TouchableOpacity
-            onPress={() => {
-              Alert.alert('Payment', 'Proceed to payment (mock)');
-              clearCart();
-            }}
-            style={[styles.payButton, { backgroundColor: Palette.warmCopper }]}
-          >
-            <Text style={styles.payButtonText}>Pay Now</Text>
-          </TouchableOpacity>
+  onPress={async () => {
+  if (loading) return; // prevent double-clicks
+  setLoading(true);
+
+  if (!user?.email) {
+    Alert.alert('Error', 'You must be logged in to checkout.');
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const response = await axios.post('http://localhost:8000/checkout', {
+      email: user.email,
+      items: cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+      total: total,
+    });
+
+    if (response.data.success) {
+  const receiptSnapshot = [...cart];
+
+  // ✅ Include transaction_id from backend
+  setReceiptData({ 
+    items: receiptSnapshot, 
+    total, 
+    transaction_id: response.data.transaction_id 
+  });
+
+  setShowReceipt(true);
+  clearCart();
+} else {
+  Alert.alert('Error', 'Checkout failed.');
+}
+  } catch (err) {
+    console.error(err);
+    Alert.alert('Error', 'Failed to process checkout.');
+  } finally {
+    setLoading(false);
+  }
+}}
+  style={[styles.payButton, { backgroundColor: Palette.warmCopper }]}
+  disabled={loading}
+>
+  <Text style={styles.payButtonText}>
+    {loading ? "Processing..." : "Pay Now"}
+  </Text>
+</TouchableOpacity>
         </View>
       )}
+
+{showReceipt && receiptData && (
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContainer}>
+      <Text style={styles.modalTitle}>✅ Payment Successful!</Text>
+
+      <FlatList
+        data={receiptData.items}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={styles.modalItem}>
+            <Text style={styles.modalItemText}>
+              {item.name} x {item.quantity} — ₱{item.price * item.quantity}
+            </Text>
+          </View>
+        )}
+      />
+
+      <Text style={styles.modalTotal}>Grand Total: ₱{receiptData.total}</Text>
+      <Text style={styles.modalTotal}>Transaction ID: {receiptData.transaction_id}</Text>
+
+      <TouchableOpacity
+        style={[styles.payButton, { marginTop: 12 }]}
+        onPress={() => setShowReceipt(false)}
+      >
+        <Text style={styles.payButtonText}>Close</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+)}
+
     </View>
   );
 }
@@ -195,4 +275,44 @@ quantityText: {
     fontFamily: Fonts.bold,
     fontSize: 16,
   },
+  modalOverlay: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(0,0,0,0.6)',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 999,
+},
+modalContainer: {
+  width: '85%',
+  maxHeight: '80%',
+  backgroundColor: Palette.charcoalEspresso,
+  borderRadius: 16,
+  padding: 24,
+},
+modalTitle: {
+  fontFamily: Fonts.bold,
+  fontSize: 20,
+  marginBottom: 12,
+  color: Palette.linenWhite,
+},
+modalItem: {
+  paddingVertical: 4,
+  borderBottomWidth: 1,
+  borderBottomColor: Palette.stoneGray,
+},
+modalItemText: {
+  fontFamily: Fonts.medium,
+  fontSize: 16,
+  color: Palette.linenWhite,
+},
+modalTotal: {
+  fontFamily: Fonts.bold,
+  fontSize: 18,
+  marginTop: 12,
+  color: Palette.linenWhite,
+},
 });
