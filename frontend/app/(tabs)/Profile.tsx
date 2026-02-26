@@ -263,37 +263,45 @@ export default function Profile() {
     }
   };
 
-  const updateProfile = async () => {
-    try {
-      setSaving(true);
-      const storedToken = await AsyncStorage.getItem('jwt_token');
-      const storedId = await AsyncStorage.getItem('user_id');
-      if (!storedToken || !storedId) {
-        router.replace('/');
-        return;
-      }
-
-      const updateData: any = { name: name.trim(), email: email.trim() };
-      if (password) updateData.password = password;
-      if (photoPublicId) updateData.photoPublicId = photoPublicId;
-
-      await axios.put(`${API_URL}/profile/${storedId}`, updateData, {
-        headers: { Authorization: `Bearer ${storedToken}` },
-      });
-
-      await AsyncStorage.setItem('name', name.trim());
-      await refreshUser();
-      Alert.alert('Success', 'Profile updated successfully!');
-      setIsEditing(false);
-      setPassword('');
-      setConfirmPassword('');
-    } catch (error: any) {
-      console.error('Update error:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to update profile');
-    } finally {
-      setSaving(false);
+const updateProfile = async () => {
+  try {
+    setSaving(true);
+    const storedToken = await AsyncStorage.getItem('jwt_token');
+    const storedId = await AsyncStorage.getItem('user_id');
+    if (!storedToken || !storedId) {
+      router.replace('/');
+      return;
     }
-  };
+
+    const updateData: any = { 
+      name: name.trim(), 
+      email: email.trim() 
+    };
+    if (password) updateData.password = password;
+    if (photoPublicId) updateData.photoPublicId = photoPublicId;
+
+    console.log("Sending update:", updateData);  // <-- DEBUG
+
+    await axios.put(`${API_URL}/profile/${storedId}`, updateData, {
+      headers: { 
+        Authorization: `Bearer ${storedToken}`,
+        'Content-Type': 'application/json', // <-- IMPORTANT
+      },
+    });
+
+    await AsyncStorage.setItem('name', name.trim());
+    await refreshUser();
+    Alert.alert('Success', 'Profile updated successfully!');
+    setIsEditing(false);
+    setPassword('');
+    setConfirmPassword('');
+  } catch (error: any) {
+    console.error('Update error:', error);
+    Alert.alert('Error', error.response?.data?.message || 'Failed to update profile');
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handleLogout = async () => {
     try {
@@ -335,7 +343,7 @@ export default function Profile() {
       <View style={styles.header}>
         {!isWeb && (
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={22} color={Palette.charcoalEspresso} />
+            <Ionicons name="arrow-back" size={22} color={Palette.deepObsidian} />
           </TouchableOpacity>
         )}
         <Text style={styles.title}>My Profile</Text>
@@ -500,7 +508,7 @@ export default function Profile() {
           </View>
         </View>
       ) : (
-        <ScrollView style={[styles.container, { backgroundColor: Palette.charcoalEspresso }]} showsVerticalScrollIndicator={false}>
+        <ScrollView style={[styles.container, { backgroundColor: Palette.deepObsidian }]} showsVerticalScrollIndicator={false}>
           <ProfileContent />
         </ScrollView>
       )}
@@ -537,7 +545,7 @@ export default function Profile() {
             </View>
 
             <TouchableOpacity style={styles.modalCancelButton} onPress={() => setPhotoModalVisible(false)} disabled={uploadingPhoto}>
-              <Text style={{ color: Palette.slate, fontSize: 16, fontFamily: Fonts.bold }}>Cancel</Text>
+              <Text style={{ color: Palette.linenWhite, fontSize: 16, fontFamily: Fonts.bold }}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
